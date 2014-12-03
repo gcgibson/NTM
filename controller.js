@@ -6,11 +6,12 @@ var net = new brain.NeuralNetwork();
 //input 
 var w_t = [1,1];
 var k_t =[1,1];
-var b_t=1;
+var b_t=[1];
 var m_t =  [[1,1],[1,1]];
 var e_t= [0,0];
-var g_t = 1;
+var g_t = [1];
 var s_t=[0,0];
+var a_t=[0,0];
 
  //var tmp1 = memoryMatrix.generateContentBasedNormalization(1,k_t,m_t);
  //console.log(tmp1 + " " +g_t + " " + previousWeightVector);
@@ -70,17 +71,30 @@ Perceptron.prototype = new synaptic.Network();
 Perceptron.prototype.constructor = Perceptron;
 
 
-var myNetwork = new Perceptron(2,20,1);
+var myNetwork = new Perceptron(3,50,16);
+var learningRate = .3;
+//construct input 
+var input = [0];
+var target = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var inputVector = input.concat(r_t);
+for (var i = 0; i < 20000; i++)
+{
+    // 0,0 => 0
+    myNetwork.activate(inputVector);
+    myNetwork.propagate(learningRate, target);
 
-var trainingSet = [
-    {
-        input: [[1,1]],
-        output: [[1,1]]
-    }
-];
+    
+}
+// var w_t = [1,1];
+// var k_t =[1,1];
+// var b_t=[1];
+// var m_t =  [[1,1],[1,1]];
+// var e_t= [0,0];
+// var g_t = [1];
+// var s_t=[0,0];
+// var a_t-[0,0];
 
-var trainer = new synaptic.Trainer(myNetwork);
-console.log(trainer.train(trainingSet,{ rate: .1, iterations: 20000, error: .0000005}));
-console.log(myNetwork.activate([1,-1]));
-
+// test the network
+var outputVector = myNetwork.activate([.7,1,1]);
+console.log(outputVector); // [0.012950087641929467]
 
