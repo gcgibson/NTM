@@ -1,15 +1,16 @@
 var brain = require('brain');
-var synaptic = require('synaptic');
+var synaptic = require('./synaptic');
 var memoryMatrix = require('./memoryMatrix');
 var net = new brain.NeuralNetwork();
 //console.log(memoryMatrix.memMat);
+//input 
 var w_t = [1,1];
-var k_t =[.5,.5];
+var k_t =[1,1];
 var b_t=1;
-var m_t =  [[.5,.5],[.5,.5]];
+var m_t =  [[1,1],[1,1]];
 var e_t= [0,0];
-var g_t = .5;
-var s_t=[.5,.5];
+var g_t = 1;
+var s_t=[0,0];
 
  //var tmp1 = memoryMatrix.generateContentBasedNormalization(1,k_t,m_t);
  //console.log(tmp1 + " " +g_t + " " + previousWeightVector);
@@ -19,7 +20,8 @@ var s_t=[.5,.5];
 // //console.log(tmp3);
  //var tmp4 = memoryMatrix.sharpening(tmp3,g_t,m_t);
 // //console.log(tmp4);
-var r_t = readHeadConvolution(w_t,m_t);
+//var r_t = readHeadConvolution(w_t,m_t);
+var r_t =[1,1];
 console.log(r_t);
 //experiments with LSTM
 
@@ -68,18 +70,17 @@ Perceptron.prototype = new synaptic.Network();
 Perceptron.prototype.constructor = Perceptron;
 
 
-var myNetwork = new Perceptron(2,10,2);
+var myNetwork = new Perceptron(2,20,1);
 
-var learningRate = .3;
-for (var i = 0; i < 20000; i++)
-{
-    // memory copy function
-    myNetwork.activate(r_t);
-    myNetwork.propagate(learningRate, r_t);
+var trainingSet = [
+    {
+        input: [[1,1]],
+        output: [[1,1]]
+    }
+];
 
-}
-console.log(myNetwork.activate(r_t));
-
-
+var trainer = new synaptic.Trainer(myNetwork);
+console.log(trainer.train(trainingSet,{ rate: .1, iterations: 20000, error: .0000005}));
+console.log(myNetwork.activate([1,-1]));
 
 

@@ -48,8 +48,9 @@ generateContentBasedNormalization: function (b_t,k_t,memMat){
 		var tmp = cosineSimilar(k_t,memMat[i]);
 		totalSum += Math.exp(b_t*tmp);
 	}
+	console.log(totalSum)
 	for(var i =0; i < memMat.length; i ++){
-
+				
 		k_t[i] = Math.exp(b_t*cosineSimilar(k_t,memMat[i]))/totalSum;
 	}
 	
