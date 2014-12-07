@@ -17,14 +17,17 @@ sharpening:function (wG_t,gamma_t,memMat){
 	return wG_t;
 },
 convolutionalShift: function (s_t,wG_t,memMat){
-	for(var i =0; i < wG_t.length; i++){	
-		var sum = 0;
-		for(var j =0; j < memMat.length; j++){
-				sum+=wG_t[j]*s_t[i-j]
+
+	var tmp = [];
+	for(var i = 0; i < wG_t.length; i++){
+		var res= 0;
+		for(var j =0; j < memMat[0].length; j++){
+			res+=wG_t[j]*s_t[i-j+j]
 		}
-		wG_t[i] = sum;
+		tmp.push(res);
 	}
-	return wG_t;
+
+	return tmp;
 },
 interpolationGate: function (g_t,wC_t,w_tM1){
 	var tmpWCT = [];
@@ -40,17 +43,13 @@ interpolationGate: function (g_t,wC_t,w_tM1){
 },
 
 generateContentBasedNormalization: function (b_t,k_t,memMat){
-	console.log('memMat   ---->' + memMat);
-	console.log('k_t   ---->' + k_t);
-		console.log('b_t   ---->' + b_t);
 	var totalSum = 0;
 	for(var i =0; i < memMat.length; i ++){
 		var tmp = cosineSimilar(k_t,memMat[i]);
 		totalSum += Math.exp(b_t*tmp);
 	}
-	console.log(totalSum)
 	for(var i =0; i < memMat.length; i ++){
-				
+
 		k_t[i] = Math.exp(b_t*cosineSimilar(k_t,memMat[i]))/totalSum;
 	}
 	
@@ -69,8 +68,6 @@ cosineSimilar: function (a,b){
 };
 
 function cosineSimilar  (a,b){
-	console.log('consine compare a ->>>> ',a);
-	console.log('consine compare b ->>>> ',b);
 	var numerator = numeric.dotVV(a,b);
 	//console.log(numerator);
 	var sum1  = 0;
@@ -82,6 +79,5 @@ function cosineSimilar  (a,b){
 		sum2+=b[i];
 	}
 	var denominator = (sum1 + sum2);
-	console.log(numerator/denominator);
 	return (numerator/denominator);
 }
