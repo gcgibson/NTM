@@ -1,142 +1,161 @@
-var brain = require('brain');
-var synaptic = require('./synaptic');
-var memoryMatrix = require('./memoryMatrix');
-var net = new brain.NeuralNetwork();
-//console.log(memoryMatrix.memMat);
-//input 
-var w_t = {'0':Math.random(),'1':Math.random()};
-var k_t ={'0':1,'1':1};
-var b_t={'0':10};
-var m_t =  [[2,3],[4,5]];
-var e_t= {'0':1,'1':1};
-var g_t = {'0':1};
-var s_t={'0':0,'1':1};
-var a_t={'0':0,'1':0};
-var y_t= {'0':1};
+module.exports.controllerFunction =controllerFunction;
+var numeric  = require('numeric');
 
+var P;
 
-//experiments with LSTM
-
-function updateMemoryMatrix(m_t,w_t,e_t){
-	var tmp=[];
-	var ones = [];
-	for(var i=0; i <w_t.length; i++){
-		ones.push(1);
-	}
-	for(var i = 0; i < m_t.length; i++){
-		tmp.push(numeric.dotVV(m_t[i], numeric.sub(ones,numeric.mul(e_t,w_t))));
-	}
-
-	return tmp;
+var		input_size = 4,
+		mem_size   = 20,
+		mem_width  = 4,
+		output_size = 4,
+		shift_width =3,
+		layer_sizes=20,
+		no_heads= 1;
+var W_input_hidden = [[]];
+var W_read_hidden = [[]];
+var b_hidden_0 = [];
+//initialize weight matrices
+//initialise the variables in the cache
+for (var i =0; i < input_size; i++){
+    var tmp = [];
+    for(var j=0; j< layer_sizes; j++){
+        tmp.push(Math.random());
+    }  
+    W_input_hidden.push(tmp);
 }
-function readHeadConvolution(w_t,m_t){
-	var tmp =[];
-	for(var i = 0; i <w_t.length;i++){
-		var sum= 0;
-		for(var j= 0; j<m_t.length; j++){
-			sum+=w_t[i]*m_t[i][j];
-		}
-		tmp.push(sum);
-	}
-	return tmp;
+
+for(var i2 = 0; i2 < mem_width; i2++){
+    var tmp2=[];
+    for(var j2 =0; j2 <layer_sizes; j2++){
+        tmp2.push(Math.random());
+    }
+    W_read_hidden.push(tmp2);
 }
-function Perceptron(input, hidden, output)
-{
-    // create the layers
-    var inputLayer = new synaptic.Layer(input);
-    var hiddenLayer = new synaptic.Layer(hidden);
-    var outputLayer = new synaptic.Layer(output);
 
-    // connect the layers
-    inputLayer.project(hiddenLayer);
-    hiddenLayer.project(outputLayer);
+for(var i =0; i < layer_sizes; i++ ){
+    b_hidden_0.push(0.0);
+}
 
-    // set the layers
-    this.set({
-        input: inputLayer,
-        hidden: [hiddenLayer],
-        output: outputLayer
+var hidden_weights = [];
+var W_hidden_output = [[]];
+var b_output = [];
+
+for (var i3 = 0; i3 < layer_sizes; i3++){
+    var tmp3 = [];
+    for(var j3 = 0; j3 <output_size; j3++){
+        tmp3.push(Math.random());
+    }
+    W_hidden_output.push(tmp3);
+    
+}
+
+for (var i = 0; i <output_size; i++){
+    b_output.push(0.0);
+}
+
+   W_input_hidden.shift();
+    W_read_hidden.shift();
+    W_hidden_output.shift();
+var model=require("./model.js");
+
+model.myCache.set( "W_input_hidden", W_input_hidden, function( err, success ){
+   if( !err && success ){
+   }
+ });
+ model.myCache.set( "W_read_hidden", W_read_hidden, function( err, success ){
+   if( !err && success ){
+   }
+ });
+ model.myCache.set( "b_hidden_0", b_hidden_0, function( err, success ){
+   if( !err && success ){
+   }
+ });
+ model.myCache.set( "hidden_weights", hidden_weights, function( err, success ){
+   if( !err && success ){
+   }
+ });
+ model.myCache.set( "W_hidden_output", W_hidden_output, function( err, success ){
+   if( !err && success ){
+   }
+ });
+ model.myCache.set( "b_output", b_output, function( err, success ){
+   if( !err && success ){
+   }
+ });
+
+//I think the ControllerFunction i
+
+function controllerFunction(input_t,read_t,callback){
+    
+ 
+    //why is input_t an array
+    //THIS FUNCTION IS DEFINITELY NOT CORRECT
+   
+    
+    //need to multiply by the individual vals
+   //need to read from the cache
+    model.myCache.get( "W_input_hidden", function( err, W_input_hidden ){
+    model.myCache.get( "W_read_hidden", function( err, W_read_hidden ){
+    model.myCache.get( "b_hidden_0", function( err, b_hidden_0 ){
+     model.myCache.get( "W_hidden_output", function( err, W_hidden_output ){   
+
+        //SECOND PREDICT IS BREAKING HERE
+         var tmp1= numeric.dotVM(input_t,W_input_hidden.W_input_hidden);
+    var tmp2= numeric.dotVM(read_t,W_read_hidden.W_read_hidden);
+    var tmp3  = numeric.add(tmp1,tmp2);
+    var prev_layer = numeric.add(tmp3,
+            b_hidden_0.b_hidden_0);
+            
+    for(var i = 0; i < prev_layer.length; i ++){
+        prev_layer[i] = tanh(prev_layer[i]);
+    }
+    
+    
+    //htis is right because it is 20 
+    //W_hidden_output is an array of zeroes
+        var fin_hidden = prev_layer;
+    
+     
+
+    var dotTmp =numeric.dotVM(fin_hidden,W_hidden_output.W_hidden_output);
+    
+    var tmpOutPut_t = numeric.add(dotTmp,b_output);
+    var output_t= [];
+    
+    for(var i =0; i < tmpOutPut_t.length;i++){
+        output_t.push(sigmoid(tmpOutPut_t[i]));
+    }
+    
+        callback([output_t,fin_hidden]);
+    
+   
+    }); 
+    });        
     });
-}
-
-// extend the prototype chain
-Perceptron.prototype = new synaptic.Network();
-Perceptron.prototype.constructor = Perceptron;
-
-var target = length(e_t)+ length(a_t)+ length(k_t) + length(s_t) + length(b_t) + length(g_t) + length(y_t);	
-var input = [1];
-var r_t ={'0':1,'1':1};
-var myNetwork = new Perceptron(length(r_t),50,target);
-var learningRate = .3;
-//construct input 
-
-r_t[length(r_t)-1] = input[0];
-console.log(inputToArray(r_t));
-// test the network
-var outputVector = myNetwork.activate(inputToArray(r_t));
-
-
-var count = 0;
-new_e_t = (outputVector.slice(0,length(e_t)));
-count += length(e_t);
-new_a_t =(outputVector.slice(count,count+length(a_t)));
-count += length(a_t);
-new_k_t = (outputVector.slice(count,count+length(k_t)));
-count += length(k_t);
-new_s_t = (outputVector.slice(count,count+length(s_t)));
-count += length(s_t);
-new_b_t = (outputVector.slice(count,count+length(b_t)));
-count += length(b_t);
-new_g_t = (outputVector.slice(count,count+length(g_t)));
-count += length(g_t);
-new_y_t = (outputVector.slice(count,count+length(y_t)));
-console.log('New e_t ---> ', new_e_t);
-console.log('New a_t ---> ',new_a_t);
-console.log('New k_t ---> ',new_k_t);
-console.log('New s_t ---> ',new_s_t);
-console.log('New b_t ---> ',new_b_t);
-console.log('New g_t ---> ',new_g_t);
-console.log('New y_t ---> ',new_y_t);
-console.log('M_T OLd------->  ',m_t);
-
- var tmp1 = memoryMatrix.generateContentBasedNormalization(new_b_t,new_k_t,m_t);
-  var tmp2 = memoryMatrix.interpolationGate(new_g_t,tmp1,inputToArray(w_t));
- var tmp3 = memoryMatrix.convolutionalShift(arrayToInput(new_s_t),tmp2,m_t);
-w_t = memoryMatrix.sharpening(tmp3,new_g_t,m_t);
- console.log(w_t);
-r_t = readHeadConvolution(w_t,m_t);
-m_t= updateMemoryMatrix(m_t,w_t,new_e_t)
-console.log('M_T New------->  ',m_t);
-
-
-
-function length(json){
-	sum= 1;
-	for(var key in json)
-	{
-  		sum+=1;
-	}
-	return sum-1;
-}
-function inputToArray(json){
-	var array= [];
-	for(var key in json)
-	{
-  		array.push(json[key]);
-	}
-	return array;
-}
-
-function arrayToInput(array){
-	return {
-		'-1':array[0],
-		'0':array[1],
-		'1':array[2]
-	}
-
-
+    });
+   
+    
+    
 }
 
 
+
+
+function sigmoid(t) {
+    return 1/(1+Math.pow(Math.E, -t));
+}
+
+
+
+
+function tanh(x) {
+  if(x === Infinity) {
+    return 1;
+  } else if(x === -Infinity) {
+    return -1;
+  } else {
+    var y = Math.exp(2 * x);
+    return (y - 1) / (y + 1);
+  }
+}
 
 
