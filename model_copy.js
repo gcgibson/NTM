@@ -242,19 +242,18 @@ function shift_conv (s_t,wG_t,memMat){
 //here is the maine
 
 var P={};
-var inputSequence = [1,1,1,1];
+var inputSequence = [1,0,1,0];
 var firstTime = true;
-var learningRate = .9;
-var runNumber= finalRun = 10000;
+
 predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],function(finalResult){
-	//console.log("Final --->",finalResult[0][0]);
-	backPropogation(finalResult,runNumber);
+	console.log("Final --->",finalResult[0][0]);
+	backPropogation(finalResult);
 	
 	
 });
 
 
-function backPropogation(finalResultVector,runNumber){
+function backPropogation(finalResultVector){
 	
 	myCache.get( "W_input_hidden", function( err, W_input_hidden ){
     myCache.get( "W_read_hidden", function( err, W_read_hidden ){
@@ -264,6 +263,7 @@ function backPropogation(finalResultVector,runNumber){
     myCache.get("controller_hidden", function( err, controller_hidden){
     myCache.get("hidden_weights",function(err, hidden_weights){
     	var finalResult = finalResultVector[0][0];
+
     	var errorVector = [];
 			for (var i =0 ; i < finalResult.length; i++){
 			errorVector.push( finalResult[i] *(1-finalResult[i])*(inputSequence[i]-finalResult[i])  );
@@ -271,9 +271,21 @@ function backPropogation(finalResultVector,runNumber){
     	for(var i =0; i < W_hidden_output.W_hidden_output.length; i++){
     		for (var j=0; j< W_hidden_output.W_hidden_output[i].length; j++){
     			//when i=0 first node hidden to first node of output weight 
-    			W_hidden_output.W_hidden_output[i][j] += learningRate * errorVector[j]*controller_hidden.controller_hidden[i];
+    			W_hidden_output.W_hidden_output[i][j] += errorVector[j]*controller_hidden.controller_hidden[i];
     		}
     		
+    	}
+    	//check to if error is low enough 
+    	var sum = 0;
+    	for(var iter = 0; iter <errorVector.length; iter++){
+    		//console.log(errorVector[iter] );
+    		if(errorVector[iter] < .00000002){
+    			sum+=1;
+    		}
+    	
+    	}
+    	if(sum === errorVector.length){
+    		process.exit();
     	}
 
     	//calculate hidden layer errors
@@ -289,7 +301,7 @@ function backPropogation(finalResultVector,runNumber){
        for(var i =0; i < W_input_hidden.W_input_hidden.length; i++){
     		for (var j=0; j< W_input_hidden.W_input_hidden[i].length; j++){
     			//when i=0 first node hidden to first node of output weight 
-    			W_input_hidden.W_input_hidden[i][j] += learningRate* errorVectorHidden[j]*inputSequence[i];
+    			W_input_hidden.W_input_hidden[i][j] += errorVectorHidden[j]*inputSequence[i];
     		}
     		
     	}
@@ -299,20 +311,12 @@ function backPropogation(finalResultVector,runNumber){
     
     	
        predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,finalResultVector[1],finalResultVector[2],function(finalResult){
-				if(runNumber > 1){
+			
+					backPropogation(finalResult);
+					console.log("-------\n");
+					console.log("Final --->",finalResult[0][0]);
 
-					backPropogation(finalResult,runNumber-1);
-					//console.log("-------\n");
-					//console.log("Final --->",finalResult[0][0]);
-					if (absoluteError(finalResult[0][0], inputSequence)){
-						console.log("SUUUUUUCCCCESSSS",finalResult[0][0]);
-						process.exit();
-
-					}
-					if (runNumber ===finalRun){
-					process.exit();
-					}
-				}
+				
 				
 			
 	
@@ -331,20 +335,3 @@ function backPropogation(finalResultVector,runNumber){
 	
 }
 
-function absoluteError(finalResult, inputSequence){
-	var sum = 0;
-
-	for(var i =0 ; i < finalResult.length; i++){
-		if(Math.abs(finalResult[i] - inputSequence[i]) <.1) {
-			sum+=1;
-		}
-	}
-
-	if(sum > inputSequence.length-2) {
-		return true;
-	}
-
-	else {
-		return false;
-	}
-}

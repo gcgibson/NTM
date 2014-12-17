@@ -61,27 +61,31 @@ function head_params(x){
         var tmpW_Key =  P["W_key"];
         var tmpB_key= P["b_key"];
         var addWB = numeric.dotVM(x,tmpW_Key);
-        var key_t =  tanh(numeric.add(addWB,tmpB_key));
+        var key_t =  numeric.add(addWB,tmpB_key);
         
         
         var tmp_W_shift = P["W_shift"];
         var tmp_b_shift = P["b_shift"];
-        var shift_t = tanh(numeric.add(numeric.dotVM(x,tmp_W_shift), tmp_b_shift));
+        var shift_t = softmax(numeric.add(numeric.dotVM(x,tmp_W_shift), tmp_b_shift));
         
         var _beta_t  = numeric.add(numeric.dotVV(x,P["W_beta"]), P["b_beta"]);
         var     _gamma_t = numeric.add(numeric.dotVV(x,P["W_gamma"]), P["b_gamma"]);
         
-        var beta_t  = tanh([_beta_t])
-        var gamma_t =  tanh([_gamma_t]) + 1.0;
+        var beta_t  = softplus([_beta_t])
+        var gamma_t =  softplus([_gamma_t]) + 1.0;
         
         
-        var g_t     = tanh([numeric.add(numeric.dotVV(x,P["W_g"]),P["b_g"])]);
+        var g_t     = sigmoid([numeric.add(numeric.dotVV(x,P["W_g"]),P["b_g"])]);
         var tmpP_werase  =numeric.dotVM(x,P["W_erase"]); 
-        var erase_t = tanh(numeric.add(tmpP_werase , P["b_erase"]));
+        var erase_t = sigmoid(numeric.add(tmpP_werase , P["b_erase"]));
         var add_t   = numeric.add(numeric.dotVM(x,P["W_add"]) ,P["b_add"]);
         return [key_t,beta_t,g_t,shift_t,gamma_t,erase_t,add_t];
     
     }
+
+function softplus(x){
+    return Math.log(1+Math.exp(x));
+}
 function createInitialweights(a,b){
     var result = [[]];
     for(var i =0; i < a; i ++){
@@ -115,6 +119,30 @@ function createInitialweightsSingle(a){
 
 module.exports.build =build;
 module.exports.head_params = head_params;
+
+
+function sigmoid(array){
+    var tmpSig= [];
+    for(var i =0; i < array.length;i++){
+        tmpSig.push(sigmoidSingle(array[i]));
+    }
+    return tmpSig;
+}
+function sigmoidSingle(t) {
+    return 1/(1+Math.pow(Math.E, -t));
+}
+
+function softmax(array){
+    var tmpSoft = [];
+    var sum= 0;
+    for(var i =0 ; i < array.length; i++){
+        sum+= Math.exp(array[i]);
+    }
+    for(var i =0 ; i < array.length; i++){
+        tmpSoft.push( array[i]/sum);
+    }
+    return tmpSoft;
+}
 
 function tanh(array) {
     if(array.length>1){
