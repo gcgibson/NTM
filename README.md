@@ -1,6 +1,8 @@
+-----
 
-If you want to try a different input change input sequence in code line 245, currently length 4 inputs are supported (will be enhanced very soon).
+Developed by Graham Gibson dec 15th 2014
 
-Numerically stability is definitely still an issue, and only one read/write head is connected to the controller for now. 
+-----
 
-execute (depending on your system):  /bin/bash -c "ulimit -s 65500; exec /usr/local/bin/node --stack-size=65500 model.js" 
+
+Everything you need to know is in the config.json! 
