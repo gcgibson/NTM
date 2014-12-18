@@ -1,14 +1,18 @@
 module.exports.controllerFunction =controllerFunction;
 var numeric  = require('numeric');
+var fs = require('fs');
+var data = JSON.parse(fs.readFileSync('./config.json'));
+
+
 
 var P;
 
-var		input_size = 4,
-		mem_size   = 20,
-		mem_width  = 4,
-		output_size = 4,
-		shift_width =3,
-		layer_sizes=20,
+var		input_size = data.input_size,
+		mem_size   = data.mem_size,
+		mem_width  = data.mem_width,
+		output_size = data.output_size,
+		shift_width = data.shift_width,
+		layer_sizes= data.layer_sizes,
 		no_heads= 1;
 var W_input_hidden = [[]];
 var W_read_hidden = [[]];
@@ -157,5 +161,4 @@ function tanh(x) {
     return (y - 1) / (y + 1);
   }
 }
-
 

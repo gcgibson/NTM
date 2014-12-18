@@ -1,13 +1,16 @@
 var numeric = require('numeric');
 var NodeCache = require( "node-cache" ); 
 var myCache = new NodeCache();
+var fs = require('fs');
+var data = JSON.parse(fs.readFileSync('./config.json'));
 
-var		input_size = 4,
-		mem_size   = 20,
-		mem_width  = 4,
-		output_size = 4,
-		shift_width =3,
-		no_heads= 1;
+var		input_size = data.input_size,
+		mem_size   = data.mem_size,
+		mem_width  = data.mem_width,
+		output_size = data.output_size,
+		shift_width = data.shift_width,
+		layer_sizes= data.layer_sizes,
+		no_heads= data.no_heads;
 
 module.exports = {
 	myCache:myCache
@@ -242,7 +245,7 @@ function shift_conv (s_t,wG_t,memMat){
 //here is the maine
 
 var P={};
-var inputSequence = [1,1,1,1];
+var inputSequence = data.inputSequence;
 var firstTime = true;
 var learningRate = .9;
 var runNumber= finalRun = 10000;
@@ -305,7 +308,7 @@ function backPropogation(finalResultVector,runNumber){
 					//console.log("-------\n");
 					//console.log("Final --->",finalResult[0][0]);
 					if (absoluteError(finalResult[0][0], inputSequence)){
-						console.log("SUUUUUUCCCCESSSS",finalResult[0][0]);
+						console.log("SUUUUUUCCCCESSSS\n",finalResult[0][0]);
 						process.exit();
 
 					}
@@ -348,3 +351,4 @@ function absoluteError(finalResult, inputSequence){
 		return false;
 	}
 }
+
