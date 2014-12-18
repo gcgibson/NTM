@@ -1,9 +1,9 @@
 {
-	"inputSequence": [1,1,1,1,1,1],
-"input_size" : 6,
+	"inputSequence": [1,0,1,0],
+"input_size" : 4,
 		"mem_size"  : 20,
-		"mem_width"  : 6,
-		"output_size" : 6,
+		"mem_width"  : 4,
+		"output_size" : 4,
 		"shift_width" : 3,
 		"layer_sizes": 20,
 		"no_heads": 1

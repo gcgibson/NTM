@@ -3,7 +3,8 @@ var NodeCache = require( "node-cache" );
 var myCache = new NodeCache();
 var fs = require('fs');
 var data = JSON.parse(fs.readFileSync('./config.json'));
-
+var prompt = require('prompt');
+ prompt.start();
 var		input_size = data.input_size,
 		mem_size   = data.mem_size,
 		mem_width  = data.mem_width,
@@ -249,11 +250,34 @@ var inputSequence = data.inputSequence;
 var firstTime = true;
 var learningRate = .9;
 var runNumber= finalRun = 10000;
+var backPropIter = true;
 predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],function(finalResult){
 	//console.log("Final --->",finalResult[0][0]);
 	backPropogation(finalResult,runNumber);
+    	
 	
-	
+	prompt.get(['inputsequence'], function (err, result) {
+    //
+    // Log the results.
+    //
+    		console.log('Neural Network Trained Ready for Input sequence:');
+    	console.log('  inputsequence: ' + result.inputsequence);
+
+    	var tmpSeq = [];
+    	for(var i =0; i < result.inputsequence.length; i++){
+    		tmpSeq.push(parseInt(result.inputsequence[i]));
+    	}
+    	
+    	predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
+
+ 			console.log("Final --->",tmpfinalResult1[0][0]);
+    	});
+ 	 
+
+ 	 });
+
+
+
 });
 
 
@@ -300,20 +324,19 @@ function backPropogation(finalResultVector,runNumber){
     	//do another foward pass
     	firstTime = false;
     
-    	
        predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,finalResultVector[1],finalResultVector[2],function(finalResult){
 				if(runNumber > 1){
 
-					backPropogation(finalResult,runNumber-1);
+					
 					//console.log("-------\n");
 					//console.log("Final --->",finalResult[0][0]);
 					if (absoluteError(finalResult[0][0], inputSequence)){
 						console.log("SUUUUUUCCCCESSSS\n",finalResult[0][0]);
-						process.exit();
+						backPropIter =false;
 
 					}
-					if (runNumber ===finalRun){
-					process.exit();
+					else{
+						backPropogation(finalResult,runNumber-1);
 					}
 				}
 				
@@ -321,7 +344,7 @@ function backPropogation(finalResultVector,runNumber){
 	
 	
 		});
-
+  
      	
      	
     }); 	
@@ -343,7 +366,7 @@ function absoluteError(finalResult, inputSequence){
 		}
 	}
 
-	if(sum > inputSequence.length-2) {
+	if(sum === inputSequence.length) {
 		return true;
 	}
 
@@ -351,4 +374,3 @@ function absoluteError(finalResult, inputSequence){
 		return false;
 	}
 }
-
