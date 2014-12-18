@@ -253,19 +253,25 @@ var runNumber= finalRun = 10000;
 var backPropIter = true;
 predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],function(finalResult){
 	//console.log("Final --->",finalResult[0][0]);
+	console.log("Training on: ");
+	console.log(inputSequence);
+	console.log("\n");
 	backPropogation(finalResult,runNumber);
-    	
-	
+   	console.log("-------");
+	console.log('Neural Network Trained Ready for Input sequence: \n');
 	prompt.get(['inputsequence'], function (err, result) {
     //
     // Log the results.
     //
-    		console.log('Neural Network Trained Ready for Input sequence:');
+    		console.log("\n");
     	console.log('  inputsequence: ' + result.inputsequence);
+		console.log("\n");
 
     	var tmpSeq = [];
     	for(var i =0; i < result.inputsequence.length; i++){
+    		if(result.inputsequence[i] !== " "){
     		tmpSeq.push(parseInt(result.inputsequence[i]));
+    		}
     	}
     	
     	predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
@@ -331,7 +337,7 @@ function backPropogation(finalResultVector,runNumber){
 					//console.log("-------\n");
 					//console.log("Final --->",finalResult[0][0]);
 					if (absoluteError(finalResult[0][0], inputSequence)){
-						console.log("SUUUUUUCCCCESSSS\n",finalResult[0][0]);
+						
 						backPropIter =false;
 
 					}
