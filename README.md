@@ -4,7 +4,7 @@ Developed by Graham Gibson dec 15th 2014
 
 -----
 
-Neural Turing Machine implementation in node js. The architecture is fracking awesome. 
+Neural Turing Machine implementation in node js. The architecture the authors developed is awesome. 
 
 Here is a usage example:
 
@@ -24,6 +24,7 @@ prompt: inputsequence: 1,1,1,1
 
 
   inputsequence: 1,1,1,1
+
 
 Final ---> [ 0.9999631888851344,
   0.36935813795683203,

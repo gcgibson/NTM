@@ -1,11 +1,11 @@
 {
-	"inputSequence": [[1,0],[0.5,1],[0.5,0]],
-	"targetSequence": [[0,1],[0.5,1],[0,0.5]],
+	"inputSequence": [[0.1,0.2,0.5,0.6,0.3,0.9,0.8,0.0,0.4]],
+	"targetSequence": [[0.1,0.2,0.3,0.4,0.5,0.6,0.7,8.0,9.0]],
 
-"input_size" : 2,
+"input_size" : 9,
 		"mem_size"  : 20,
-		"mem_width"  : 2,
-		"output_size" : 2,
+		"mem_width"  : 9,
+		"output_size" : 9,
 		"shift_width" : 3,
 		"layer_sizes": 20,
 		"no_heads": 1
