@@ -2,6 +2,8 @@ var numeric = require('numeric');
 var NodeCache = require( "node-cache" ); 
 var myCache = new NodeCache();
 var fs = require('fs');
+var async = require("async");
+
 var data = JSON.parse(fs.readFileSync('./config.json'));
 var prompt = require('prompt');
  prompt.start();
@@ -246,37 +248,51 @@ function shift_conv (s_t,wG_t,memMat){
 //here is the maine
 
 var P={};
-var inputSequence = data.inputSequence;
+//var inputSequence = data.inputSequence;
+var inputSequenceArray = data.inputSequence;
+var inputSequence = null;
 var firstTime = true;
 var learningRate = .9;
 var runNumber= finalRun = 10000;
 var backPropIter = true;
-predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],function(finalResult){
+
+var inputSequenceArrayLength = inputSequenceArray.length;
+var sumLength = 0;
+async.each(inputSequenceArray,
+  // 2nd param is the function that each item is passed to
+  function(item, callback){
+  	firstTime = true;
+  	inputSequence = item;
+
+    // Call an asynchronous function, often a save() to DB
+   
+    	predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],function(finalResult){
 	//console.log("Final --->",finalResult[0][0]);
-	console.log("Training on: ");
-	console.log(inputSequence);
-	console.log("\n");
-	backPropogation(finalResult,runNumber);
-   	console.log("-------");
-	console.log('Neural Network Trained Ready for Input sequence: \n');
-	prompt.get(['inputsequence'], function (err, result) {
-    //
-    // Log the results.
-    //
-    		console.log("\n");
-    	console.log('  inputsequence: ' + result.inputsequence);
-		console.log("\n");
+			sumLength+=1;
+				console.log("Training on: ");
+				console.log(inputSequence);
+			console.log("\n");
+			backPropogation(finalResult,runNumber);
+   			console.log("-------");
+			console.log('Neural Network Trained Ready for Input sequence: \n');
+			if(sumLength ===inputSequenceArrayLength){
+				prompt.get(['inputsequence'], function (err, result) {
+   	
+    				console.log("\n");
+    				console.log('  inputsequence: ' + result.inputsequence);
+					console.log("\n");
 
-    	var tmpSeq = [];
-    	for(var i =0; i < result.inputsequence.length; i++){
-    		if(result.inputsequence[i] !== " "){
-    		tmpSeq.push(parseInt(result.inputsequence[i]));
-    		}
-    	}
+    				var tmpSeq = [];
+    				for(var i =0; i < result.inputsequence.length; i++){
+    					if(result.inputsequence[i] !== " "){
+    					tmpSeq.push(parseInt(result.inputsequence[i]));
+    					}
+    			}
     	
-    	predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
+    				predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
 
- 			console.log("Final --->",tmpfinalResult1[0][0]);
+ 						console.log("Final --->",tmpfinalResult1[0][0]);
+ 						process.exit();
     	});
  	 
 
@@ -284,7 +300,23 @@ predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],funct
 
 
 
-});
+
+			}
+		});
+	
+  },
+  // 3rd param is the function to call when everything's done
+  function(err){
+    // All tasks are done now
+    console.log("FINISHED");
+  }
+);
+
+
+
+
+
+
 
 
 function backPropogation(finalResultVector,runNumber){
