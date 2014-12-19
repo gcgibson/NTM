@@ -20,11 +20,10 @@ Training on
 -------
 Neural Network Trained Ready for Input sequence: 
 
-prompt: inputsequence:  1 1 1 1
+prompt: inputsequence: 1,1,1,1
 
 
-  inputsequence: 1 1 1 1
-
+  inputsequence: 1,1,1,1
 
 Final ---> [ 0.9999631888851344,
   0.36935813795683203,
@@ -33,7 +32,7 @@ Final ---> [ 0.9999631888851344,
 
 ++++++++++++++++++++++++++++++
 
-Right now there are some issues, firstly you can only train on one input sequence (will be fixed shortly) so give it values close to that. Second, because of the linear algebra library used you can only have 
+Right now there are some issues,because of the linear algebra library used you can only have 
 "input_size" = "mem_width" = "output_size" in the config.json. 
 
 Enjoy --feel free to submit a PR as this is obviously not all finished!

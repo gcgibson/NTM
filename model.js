@@ -250,7 +250,9 @@ function shift_conv (s_t,wG_t,memMat){
 var P={};
 //var inputSequence = data.inputSequence;
 var inputSequenceArray = data.inputSequence;
+var targetSequenceArray = data.targetSequence;
 var inputSequence = null;
+var targetSequence = null;
 var firstTime = true;
 var learningRate = .9;
 var runNumber= finalRun = 10000;
@@ -263,6 +265,7 @@ async.each(inputSequenceArray,
   function(item, callback){
   	firstTime = true;
   	inputSequence = item;
+  	targetSequence = targetSequenceArray[sumLength];
 
     // Call an asynchronous function, often a save() to DB
    
@@ -283,11 +286,9 @@ async.each(inputSequenceArray,
 					console.log("\n");
 
     				var tmpSeq = [];
-    				for(var i =0; i < result.inputsequence.length; i++){
-    					if(result.inputsequence[i] !== " "){
-    					tmpSeq.push(parseInt(result.inputsequence[i]));
-    					}
-    			}
+    				var tmpSeq = result.inputsequence.split(',').map(function(item) {
+    						return parseInt(item, 10);
+					});
     	
     				predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
 
@@ -331,7 +332,7 @@ function backPropogation(finalResultVector,runNumber){
     	var finalResult = finalResultVector[0][0];
     	var errorVector = [];
 			for (var i =0 ; i < finalResult.length; i++){
-			errorVector.push( finalResult[i] *(1-finalResult[i])*(inputSequence[i]-finalResult[i])  );
+			errorVector.push( finalResult[i] *(1-finalResult[i])*(targetSequence[i]-finalResult[i])  );
 		}
     	for(var i =0; i < W_hidden_output.W_hidden_output.length; i++){
     		for (var j=0; j< W_hidden_output.W_hidden_output[i].length; j++){
@@ -354,7 +355,7 @@ function backPropogation(finalResultVector,runNumber){
        for(var i =0; i < W_input_hidden.W_input_hidden.length; i++){
     		for (var j=0; j< W_input_hidden.W_input_hidden[i].length; j++){
     			//when i=0 first node hidden to first node of output weight 
-    			W_input_hidden.W_input_hidden[i][j] += learningRate* errorVectorHidden[j]*inputSequence[i];
+    			W_input_hidden.W_input_hidden[i][j] += learningRate* errorVectorHidden[j]*targetSequence[i];
     		}
     		
     	}
