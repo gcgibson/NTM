@@ -4,7 +4,7 @@ var myCache = new NodeCache();
 var fs = require('fs');
 var async = require("async");
 
-var data = JSON.parse(fs.readFileSync('./config.json'));
+var data = JSON.parse(fs.readFileSync('./test.json'));
 var prompt = require('prompt');
  prompt.start();
 var		input_size = data.input_size,
@@ -255,7 +255,7 @@ var inputSequence = null;
 var targetSequence = null;
 var firstTime = true;
 var learningRate = .9;
-var runNumber= finalRun = 10000;
+
 var backPropIter = true;
 
 var inputSequenceArrayLength = inputSequenceArray.length;
@@ -275,7 +275,7 @@ async.each(inputSequenceArray,
 				console.log("Training on: ");
 				console.log(inputSequence);
 			console.log("\n");
-			backPropogation(finalResult,runNumber);
+			backPropogation(finalResult);
    			console.log("-------");
 			console.log('Neural Network Trained Ready for Input sequence: \n');
 			if(sumLength ===inputSequenceArrayLength){
@@ -284,16 +284,23 @@ async.each(inputSequenceArray,
     				console.log("\n");
     				console.log('  inputsequence: ' + result.inputsequence);
 					console.log("\n");
-
-    				var tmpSeq = [];
-    				var tmpSeq = result.inputsequence.split(',').map(function(item) {
-    						return parseInt(item, 10);
-					});
-    	
+						var tmpSeq = [];
+					if(data.testSequence.length>1){
+						tmpSeq = data.testSequence;
+					}
+	    			else{
+	    			
+	    				var tmpSeq = result.inputsequence.split(',').map(function(item) {
+	    						return parseInt(item, 10);
+						});
+    				}
     				predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
 
  						console.log("Final --->",tmpfinalResult1[0][0]);
- 						process.exit();
+ 						fs.writeFile('result.txt',tmpfinalResult1[0][0],function(err){
+ 							process.exit();
+ 						});	
+ 						
     	});
  	 
 
@@ -320,7 +327,7 @@ async.each(inputSequenceArray,
 
 
 
-function backPropogation(finalResultVector,runNumber){
+function backPropogation(finalResultVector){
 	
 	myCache.get( "W_input_hidden", function( err, W_input_hidden ){
     myCache.get( "W_read_hidden", function( err, W_read_hidden ){
@@ -364,7 +371,7 @@ function backPropogation(finalResultVector,runNumber){
     	firstTime = false;
     
        predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,finalResultVector[1],finalResultVector[2],function(finalResult){
-				if(runNumber > 1){
+				
 
 					
 					//console.log("-------\n");
@@ -375,9 +382,9 @@ function backPropogation(finalResultVector,runNumber){
 
 					}
 					else{
-						backPropogation(finalResult,runNumber-1);
+						backPropogation(finalResult);
 					}
-				}
+				
 				
 			
 	
@@ -400,7 +407,7 @@ function absoluteError(finalResult, inputSequence){
 	var sum = 0;
 
 	for(var i =0 ; i < finalResult.length; i++){
-		if(Math.abs(finalResult[i] - inputSequence[i]) <.1) {
+		if(Math.abs(finalResult[i] - inputSequence[i]) <.2) {
 			sum+=1;
 		}
 	}
@@ -413,3 +420,4 @@ function absoluteError(finalResult, inputSequence){
 		return false;
 	}
 }
+
