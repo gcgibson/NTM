@@ -1,5 +1,17 @@
 var numeric = require('numeric');
+var fs = require('fs');
+
+var util = require('util');
 var P = {};
+var log_file = fs.createWriteStream(__dirname + '/debug1.log', {flags : 'w'});
+var log_stdout = process.stdout;
+
+
+  console.log = function(d) { //
+    log_file.write(util.format(d) + '\n');
+ //  // log_stdout.write(util.format(d) + '\n');
+  };
+ 
 function build(input_size,mem_width,mem_size,shift_width){
     
 
@@ -58,27 +70,30 @@ function build(input_size,mem_width,mem_size,shift_width){
 
 function head_params(x){
     // x will be a vecotr
+     
         var tmpW_Key =  P["W_key"];
         var tmpB_key= P["b_key"];
         var addWB = numeric.dotVM(x,tmpW_Key);
-        var key_t =  numeric.add(addWB,tmpB_key);
-        
+        var key_t =  sigmoid(numeric.add(addWB,tmpB_key));
+
         
         var tmp_W_shift = P["W_shift"];
         var tmp_b_shift = P["b_shift"];
         var shift_t = softmax(numeric.add(numeric.dotVM(x,tmp_W_shift), tmp_b_shift));
+
         
         var _beta_t  = numeric.add(numeric.dotVV(x,P["W_beta"]), P["b_beta"]);
         var     _gamma_t = numeric.add(numeric.dotVV(x,P["W_gamma"]), P["b_gamma"]);
         
         var beta_t  = softplus([_beta_t])
-        var gamma_t =  softplus([_gamma_t]) + 1.0;
+        var gamma_t =  softplus([_gamma_t]) + 2.0;
         
         
         var g_t     = sigmoid([numeric.add(numeric.dotVV(x,P["W_g"]),P["b_g"])]);
         var tmpP_werase  =numeric.dotVM(x,P["W_erase"]); 
         var erase_t = sigmoid(numeric.add(tmpP_werase , P["b_erase"]));
-        var add_t   = numeric.add(numeric.dotVM(x,P["W_add"]) ,P["b_add"]);
+        var add_t   = sigmoid(numeric.add(numeric.dotVM(x,P["W_add"]) ,P["b_add"]));
+    
         return [key_t,beta_t,g_t,shift_t,gamma_t,erase_t,add_t];
     
     }

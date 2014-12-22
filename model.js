@@ -3,7 +3,7 @@ var NodeCache = require( "node-cache" );
 var myCache = new NodeCache();
 var fs = require('fs');
 var async = require("async");
-
+var printP = [];
 var data = JSON.parse(fs.readFileSync('./test.json'));
 var prompt = require('prompt');
  prompt.start();
@@ -115,6 +115,7 @@ function build_head_curr(weight_prev,M_curr,head,input_curr){
 	var gamma = resultArray[4];
 	var erase = resultArray[5];
 	var add = resultArray[6];
+	printP = resultArray;
 
 	var totalSum = 0;
 	var weight_c = [];
@@ -231,12 +232,15 @@ function cosine_sim(k,M){
 }
 
 function shift_conv (s_t,wG_t,memMat){
-
+	console.log(s_t);
+	process.exit();
 	var tmp = [];
 	for(var i = 0; i < wG_t.length; i++){
 		var res= 0;
 		for(var j =0; j < memMat[0].length; j++){
-			res+=wG_t[j]*s_t[i-j+j]
+			if(s_t[i-j]){
+			res+=wG_t[j]*s_t[i-j]
+			}
 		}
 		tmp.push(res);
 	}
@@ -254,7 +258,7 @@ var targetSequenceArray = data.targetSequence;
 var inputSequence = null;
 var targetSequence = null;
 var firstTime = true;
-var learningRate = .9;
+var learningRate = .3;
 
 var backPropIter = true;
 
@@ -269,21 +273,21 @@ async.each(inputSequenceArray,
 
     // Call an asynchronous function, often a save() to DB
    
-    	predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,[[]],[],function(finalResult){
+    	predict(P,mem_size,mem_width,layer_sizes,controller,inputSequence,firstTime,[[]],[],function(finalResult){
 	//console.log("Final --->",finalResult[0][0]);
 			sumLength+=1;
-				console.log("Training on: ");
-				console.log(inputSequence);
-			console.log("\n");
+				//console.log("Training on: ");
+				//console.log(inputSequence);
+			
 			backPropogation(finalResult);
-   			console.log("-------");
-			console.log('Neural Network Trained Ready for Input sequence: \n');
+   			//console.log("-------");
+			//console.log('Neural Network Trained Ready for Input sequence: \n');
 			if(sumLength ===inputSequenceArrayLength){
 				prompt.get(['inputsequence'], function (err, result) {
    	
-    				console.log("\n");
-    				console.log('  inputsequence: ' + result.inputsequence);
-					console.log("\n");
+    				//console.log("\n");
+    				//console.log('  inputsequence: ' + result.inputsequence);
+					//console.log("\n");
 						var tmpSeq = [];
 					if(data.testSequence.length>1){
 						tmpSeq = data.testSequence;
@@ -294,11 +298,32 @@ async.each(inputSequenceArray,
 	    						return parseInt(item, 10);
 						});
     				}
-    				predict(P,mem_size,mem_width,20,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
+    				predict(P,mem_size,mem_width,layer_sizes,controller,tmpSeq,false,finalResult[1],finalResult[2],function(tmpfinalResult1){
+    					console.log("Input Sequence --->");
+ 						console.log(tmpSeq);
+ 						console.log("Final --->");
+ 						console.log(tmpfinalResult1[0][0]);
+ 						console.log("memMat --->");
+ 						console.log(tmpfinalResult1[1]);
+ 						console.log("weightings --- >");
+ 						console.log(tmpfinalResult1[2]);
+ 						console.log("Key --->")
+ 						console.log(printP[0]);
+ 						console.log("beta --->")
+ 						console.log(printP[1]);
+ 						console.log("g --->")
+ 						console.log(printP[2]);
+ 						console.log("shift --->")
+ 						console.log(printP[3]);
+ 						console.log("gamma --->")
+ 						console.log(printP[4]);
+ 						console.log("erase --->")
+ 						console.log(printP[5]);
+ 						console.log("add --->")
+ 						console.log(printP[6]);
 
- 						console.log("Final --->",tmpfinalResult1[0][0]);
  						fs.writeFile('result.txt',tmpfinalResult1[0][0],function(err){
- 							process.exit();
+ 							
  						});	
  						
     	});
@@ -370,7 +395,7 @@ function backPropogation(finalResultVector){
     	//do another foward pass
     	firstTime = false;
     
-       predict(P,mem_size,mem_width,20,controller,inputSequence,firstTime,finalResultVector[1],finalResultVector[2],function(finalResult){
+       predict(P,mem_size,mem_width,layer_sizes,controller,inputSequence,firstTime,finalResultVector[1],finalResultVector[2],function(finalResult){
 				
 
 					
@@ -420,4 +445,3 @@ function absoluteError(finalResult, inputSequence){
 		return false;
 	}
 }
-

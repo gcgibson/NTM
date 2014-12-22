@@ -1,7 +1,7 @@
 module.exports.controllerFunction =controllerFunction;
 var numeric  = require('numeric');
 var fs = require('fs');
-var data = JSON.parse(fs.readFileSync('./config.json'));
+var data = JSON.parse(fs.readFileSync('./test.json'));
 
 
 
