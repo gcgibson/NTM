@@ -68,6 +68,7 @@ function build_memory_curr(M_prev,erase_head,add_head,weight){
 
 }
 function build_read(M_curr,weight_curr){
+	console.log("READING FROM MATRIX");
 	var tmp =[];
 
 	for(var i = 0; i <mem_width;i++){
@@ -108,6 +109,8 @@ function build_head_curr(weight_prev,M_curr,head,input_curr){
 	//Now we got a problem here
 	//This is from figure 2
 	var resultArray = 	head.head_params(input_curr);
+	console.log(input_curr);
+	setTimeout(function(){process.exit(); }, 3000);
 	var key = resultArray[0];
 	var beta = resultArray[1];
 	var g =resultArray[2];
@@ -432,7 +435,7 @@ function absoluteError(finalResult, inputSequence){
 	var sum = 0;
 
 	for(var i =0 ; i < finalResult.length; i++){
-		if(Math.abs(finalResult[i] - inputSequence[i]) <.2) {
+		if(Math.abs(finalResult[i] - inputSequence[i]) <10) {
 			sum+=1;
 		}
 	}

@@ -8,7 +8,7 @@ var fileJSON =JSON.parse(buf);
 
 //COpy takse
 var sequenceLengthToCopy = 4;
-var numSequencesToCopy = 5000;
+var numSequencesToCopy = 1;
 var data  =[[]];
 for (var i =0 ; i < numSequencesToCopy; i++ ){
 	var tmpData = [];
