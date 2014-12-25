@@ -1,6 +1,6 @@
 
 
-var testSequenceLength = 4;
+var testSequenceLength = 1;
 var fs = require('fs');
 var util = require('util');
 
@@ -8,12 +8,12 @@ var synaptic = require('synaptic');
 var inputLayer = new synaptic.Layer(testSequenceLength+4);
 var hiddenLayer = new synaptic.Layer(20);
 var headLayer = new synaptic.Layer(11);
-var outputLayer = new synaptic.Layer(testSequenceLength);
+var outputLayer = new synaptic.Layer(1);
 
 inputLayer.project(hiddenLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
 hiddenLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
 hiddenLayer.project(headLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
-//headLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
+headLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
 
 var sumFile = fs.readFileSync('./resCatOnpoint5.txt');
  var log_file = fs.createWriteStream(__dirname + '/debug2.log', {flags : 'w'});
@@ -25,6 +25,18 @@ var sumFile = fs.readFileSync('./resCatOnpoint5.txt');
 //  //  // log_stdout.write(util.format(d) + '\n');
    };
 
+ inputLayer.set({
+     squash: synaptic.Neuron.squash.TANH
+ })
+ hiddenLayer.set({
+     squash: synaptic.Neuron.squash.TANH
+ })
+ headLayer.set({
+     squash: synaptic.Neuron.squash.TANH
+ })
+ outputLayer.set({
+    squash: synaptic.Neuron.squash.TANH
+})
 
 
 
@@ -32,123 +44,33 @@ var memoryTape = [Math.random(),Math.random(),Math.random(),Math.random()];
 var tapeWeights = initializeTapeWeights();
 var initialTapeWeights = tapeWeights;
 var instructionSequence = [];
-var testSequenceArray = [[]];
-var numOfSequences= 20;
-for(var i =0; i <numOfSequences ; i++){
-    var tmp = [];
-    for(var j = 0; j<testSequenceLength; j++){
-        tmp.push(Math.random());
-    }
-    testSequenceArray.push(tmp);
-}
-testSequenceArray.shift();
-var insertSeq = [0,0,0,0];
-testSequenceArray =[insertSeq];
+
+var testSequenceArray= [0,1];
 var learningRate = .01;
 var runLength =2000;
-
-for(var p =0; p <testSequenceArray.length; p++){
-   
-    var testSequence = testSequenceArray[p];
-    for (var k = 0; k < runLength; k++)
-    {
-
-        
-        var input = build_read(memoryTape,tapeWeights);
-        var tmpmem = memoryTape;
-
-        inputLayer.activate(input.concat(testSequence));
-
-        var headInputs = headLayer.activate();
-       
-
-        var erase  = headInputs.slice(0,1);
-
-       
-        var add = headInputs.slice(1,2);
-
-        var key = sigmoidSingle(headInputs.slice(2,3));
-        var beta = softplus(headInputs.slice(3,4));
-        var gt = sigmoidSingle(headInputs.slice(4,5));
-        var shift = headInputs.slice(5,8);
-        var gamma = softplus(headInputs.slice(8,9))+1;
-
-        var tmp = focus_by_content(memoryTape,key,beta);
-
-        var tmp2 = focus_by_location(tmp,memoryTape,gt)
-
-
-        var shift_convolveRes = softmax(shift_convolve(tmp2,shift));
-        tapeWeights = sharpen(shift_convolveRes,gamma);
-
-        var erased = build_erase(memoryTape,tapeWeights,erase);
-        memoryTape = build_add(erased,tapeWeights,erase);
-
-
-        // when A activates [1, 0, 1, 0, 1]
-        // train B to activate [0,0]
-         outputLayer.activate();
-        outputLayer.propagate(learningRate, testSequence);
-        
-
-        if(k===runLength-1){
-       
-         pprint("Learning step --->   ");
-        pprint(k);
-          pprint("memoryTape");
-        pprint(memoryTape);
-        pprint("\n");
-        
-         pprint("erased");
-        pprint(erase);
-        pprint("\n");
-
-         pprint("add");
-        pprint(add);
-        pprint("\n");
-
-           pprint("tapeWeights");
-        pprint(tapeWeights);
-        pprint("\n");
-      
-        parseInstructions(memoryTape,erase,add,tapeWeights);
-
-
-        }
-       
-    }
-}
-// test it
-var input = build_read(memoryTape,tapeWeights,false);
-
-pprint("\n");
-
-pprint("\n");
-
-pprint("\n");
-pprint("------------------------ \n");
-var newTestSequence = insertSeq;
-
-
-
-pprint("readINput \n");
-pprint(input);
-
-pprint("inputLayer \n");
-
-pprint(inputLayer.activate(input.concat(newTestSequence)));
+var learningRate = .3;
 
 
   
+    
+        
+for (var i = 0; i < 2000; i++)
+    {   
 
 
-pprint("hiddenLayer \n");
-pprint(hiddenLayer.activate());
 
-pprint("headLayer \n");
-pprint(headLayer.activate());
+            train(testSequenceArray[0]);
+            train(testSequenceArray[1]);
 
-pprint("Output \n");
+          
+         
+}
+   
+
+// test it
+
+
+
 var negWeights = 0;
 for(var i =0; i <outputLayer.list.length; i++){
      var connectionList = outputLayer.list[i]['connections'];
@@ -160,12 +82,35 @@ for(var i =0; i <outputLayer.list.length; i++){
         
      }
 }
-fs.writeFileSync('./resCatOnpoint5.txt', sumFile.toString().concat(negWeights.toString()).concat("\n"), 'utf8');
 
-pprint(console.log(outputLayer.activate()));
-var prefix = "<+<+<+<+";
+// var input = [0].concat(build_read(memoryTape,tapeWeights));
 
-console.log(prefix.concat(instructionSequence.join("")));
+// inputLayer.activate();
+//   hiddenLayer.activate();
+//   headLayer.activate();
+var actaulInputSequence = [0,1];
+for(var iter3 =0; iter3 < actaulInputSequence.length; iter3++){
+
+     var testSequence = actaulInputSequence[iter3];
+        
+
+            
+            var input = build_read(memoryTape,tapeWeights);
+            var tmpmem = memoryTape;
+
+            inputLayer.activate(input.concat(testSequence));
+            hiddenLayer.activate();
+            headLayer.activate();
+
+           
+            // when A activates [1, 0, 1, 0, 1]
+            // train B to activate [0,0]
+            console.log(outputLayer.activate());
+
+
+
+
+}
 
 
 
@@ -173,12 +118,58 @@ console.log(prefix.concat(instructionSequence.join("")));
 
 
 
+     
+           
+      
 
 
 
 
 
+function train(input){
 
+
+            var testSequence = input;
+        
+
+            
+            var input = build_read(memoryTape,tapeWeights);
+            var tmpmem = memoryTape;
+
+            inputLayer.activate(input.concat(testSequence));
+            hiddenLayer.activate();
+            var headInputs = headLayer.activate();
+           
+          
+            var erase  = headInputs.slice(0,1);
+
+           
+            var add = headInputs.slice(1,2);
+
+            var key = sigmoidSingle(headInputs.slice(2,3));
+            var beta = softplus(headInputs.slice(3,4));
+            var gt = sigmoidSingle(headInputs.slice(4,5));
+            var shift = headInputs.slice(5,8);
+            var gamma = softplus(headInputs.slice(8,9))+1;
+
+            var tmp = focus_by_content(memoryTape,key,beta);
+
+            var tmp2 = focus_by_location(tmp,memoryTape,gt)
+
+
+            var shift_convolveRes = softmax(shift_convolve(tmp2,shift));
+            tapeWeights = sharpen(shift_convolveRes,gamma);
+
+            var erased = build_erase(memoryTape,tapeWeights,erase);
+            memoryTape = build_add(erased,tapeWeights,erase);
+
+           
+            // when A activates [1, 0, 1, 0, 1]
+            // train B to activate [0,0]
+                outputLayer.activate();
+              outputLayer.propagate(learningRate, [testSequence]);
+
+}
 
 
 
