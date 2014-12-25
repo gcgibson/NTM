@@ -106,6 +106,24 @@ for(var iter3 =0; iter3 < actaulInputSequence.length; iter3++){
             // when A activates [1, 0, 1, 0, 1]
             // train B to activate [0,0]
             console.log(outputLayer.activate());
+        pprint("Learning step ---> ");
+        pprint(iter3);
+          pprint("memoryTape");
+        pprint(memoryTape);
+        pprint("\n");
+        
+         pprint("erased");
+        pprint(erase);
+        pprint("\n");
+
+         pprint("add");
+        pprint(add);
+        pprint("\n");
+
+           pprint("tapeWeights");
+        pprint(tapeWeights);
+        pprint("\n");
+
 
 
 
@@ -169,6 +187,7 @@ function train(input){
                 outputLayer.activate();
               outputLayer.propagate(learningRate, [testSequence]);
 
+        
 }
 
 
