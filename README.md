@@ -22,4 +22,4 @@ matrix for arbitrary sequence length.
 
 
 tl;dr 
-  Very simple NTM archetecture used to output instruction sequence in BF for copying sequences into memory.
+  Very simple NTM architecture used to output instruction sequence in BF for copying sequences into memory.
