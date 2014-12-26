@@ -12,6 +12,8 @@ I just added a simply bfInterpreter that actually ouputs BF code in the simple i
 the interactions between the controller and the memory matrix. 
 
 Currently there are some limitations:
+
+
 1) Only sequences of binary values can be added becasue BF only has a + - instrcution set so not sure how I want to 
 handle floats yet.
 
