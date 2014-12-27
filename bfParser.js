@@ -3,6 +3,35 @@ var util = require('util');
 
 var writeWeightsFile = fs.readFileSync('./writeWeights.log');
 var writeWeights = writeWeightsFile.toString().split('[');
+var outputs = fs.readFileSync('./outputs.log').toString().split('\n')[0];
+var numericOutputs = [[]];
+	var tmp = [];
+for(var i =0; i<outputs.length; i++){
+
+	if(outputs[i]  === '[' || outputs[i] === ' ' || outputs[i]  === ']' ){
+		
+	}
+	else {
+		
+		if(outputs[i] === ','){
+			numericOutputs.push(tmp);
+			tmp =[];
+		}
+		else{
+			
+			tmp.push(outputs[i]);
+
+		}
+	}
+}
+numericOutputs.push(tmp);
+var tmpAgainLOL = [];
+for(var iter =0 ; iter<numericOutputs.length; iter++){
+	tmpAgainLOL.push(parseFloat(numericOutputs[iter].join('')));
+}
+tmpAgainLOL.shift();
+
+
 
 var wr1 = writeWeights[1].split('\n');
 var wr2 =writeWeights[2].split('\n');;
@@ -77,14 +106,22 @@ function outBFInstructionSet(indexArr){
 	for(var i =0; i < indexArr[0]; i++){
 		instructionSet.push('>');
 	}
-	instructionSet.push('+')
+	for(var i=0; i < tmpAgainLOL[0]; i++){
+		instructionSet.push('+')
+	}
+	
 	for(var i =indexArr[0]; i < indexArr[1]; i++){
 		instructionSet.push('>');
 	}
-	instructionSet.push('+')
+	for(var i=0; i < tmpAgainLOL[1]; i++){
+		instructionSet.push('+')
+	}
+	
 	for(var i =indexArr[1]; i < indexArr[2]; i++){
 		instructionSet.push('>');
 	}
-	instructionSet.push('+')
+	for(var i=0; i < tmpAgainLOL[2]; i++){
+		instructionSet.push('+')
+	}
 	return instructionSet;
 }

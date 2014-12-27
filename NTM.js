@@ -24,6 +24,7 @@ for(var i = 0 ; i <memoryTapelength; i++){
 
  var log_filew = fs.createWriteStream(__dirname + '/writeWeights.log', {flags : 'w'});
 var log_filer = fs.createWriteStream(__dirname + '/readWeights.log', {flags : 'w'});
+var log_fileo = fs.createWriteStream(__dirname + '/outputs.log', {flags : 'w'});
 
  var log_stdout = process.stdout;
 
@@ -37,6 +38,10 @@ var log_filer = fs.createWriteStream(__dirname + '/readWeights.log', {flags : 'w
 //  //  // log_stdout.write(util.format(d) + '\n');
    };
 
+     pprintOutputs = function(d) { //
+     log_fileo.write(util.format(d) + '\n');
+//  //  // log_stdout.write(util.format(d) + '\n');
+   };
 
 
 
@@ -54,7 +59,7 @@ var log_filer = fs.createWriteStream(__dirname + '/readWeights.log', {flags : 'w
 var initialTapeWeights = initializeTapeWeights();
 var instructionSequence = [];
 
-var testSequenceArray= [1,1,1];
+var testSequenceArray= [1,0,1];
 
 
         
@@ -86,7 +91,7 @@ headLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
  // })
 
 var learningRate = .01;
-var actaulInputSequence = [1,1,1];
+var actaulInputSequence = [1,0,1];
 
 /*------ TRAINING ----------*/
 for(var numOfRuns = 0; numOfRuns<200; numOfRuns++){
@@ -190,6 +195,7 @@ function timeStep(input,run){
                     console.log(res);
                    pprintWrite(writetapeWeight);
                     pprintRead(readtapeWeights);
+                    pprintOutputs(outputLayer.activate());
                   
                    }
                 
