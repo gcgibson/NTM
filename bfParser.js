@@ -1,127 +1,135 @@
 var fs = require('fs');
 var util = require('util');
+var jf = require('jsonfile');
+var NTM = require('./NTM.js');
+var ss = require('simple-statistics');
+var numeric = require('numeric');
 
-var writeWeightsFile = fs.readFileSync('./writeWeights.log');
-var writeWeights = writeWeightsFile.toString().split('[');
-var outputs = fs.readFileSync('./outputs.log').toString().split('\n')[0];
-var numericOutputs = [[]];
+
+var maxSequenceLength  = 10;
+var testSequenceArrayOne= [1,1,1];
+var copyOftestSequenceArrayOne = JSON.parse(JSON.stringify(testSequenceArrayOne));
+var actaulInputSequenceOne = [1,1,1];
+var targetSequenceOne = [1,1,1];
+var firstRunObject = NTM.runModel(maxSequenceLength,testSequenceArrayOne,actaulInputSequenceOne,targetSequenceOne);
+
+
+var maxSequenceLength  = 10;
+var testSequenceArrayTwo= [1,1,1,1];
+var copyOftestSequenceArrayTwo = JSON.parse(JSON.stringify(testSequenceArrayTwo));
+
+var actaulInputSequenceTwo = [1,1,1,1];
+var targetSequenceTwo = [1,1,1,1];
+var secondRunObject = NTM.runModel(maxSequenceLength,testSequenceArrayTwo,actaulInputSequenceTwo,targetSequenceTwo);
+
+var inputOututPairs = [];
+inputOututPairs.push(copyOftestSequenceArrayOne,firstRunObject[firstRunObject.length-1][firstRunObject.length-1]);
+inputOututPairs.push(copyOftestSequenceArrayTwo,secondRunObject[secondRunObject.length-1][secondRunObject.length-1]);
+
+var vectorOfCoefficients = linearRegressionOverVectors(inputOututPairs);
+
+console.log("Abstracted");
+console.log(abstract([1,1,1,1,1],vectorOfCoefficients));
+
+function abstract(input, vectorOfCoefficients){
+	var probabalisitcAbstractionVector = pca(input,vectorOfCoefficients);
+	return numeric.mul(input,probabalisitcAbstractionVector);
+}
+
+function pca(input,vector){
 	var tmp = [];
-for(var i =0; i<outputs.length; i++){
-
-	if(outputs[i]  === '[' || outputs[i] === ' ' || outputs[i]  === ']' ){
-		
+	for(var i = 0; i < input.length; i++){
+		tmp.push(vector[0])
 	}
-	else {
-		
-		if(outputs[i] === ','){
-			numericOutputs.push(tmp);
-			tmp =[];
-		}
-		else{
+	return tmp;
+}
+function linearRegressionOverVectors(inputOututPairs){
+	var finalResultVector= [];
+
+	for (var k =0; k < inputOututPairs.length-1; k++){
+		var pwDataResult = constructPairWiseData(inputOututPairs[k],inputOututPairs[k+1]);
+		var linear_regression = ss.linear_regression()
+    	.data(pwDataResult);
+		finalResultVector.push(linear_regression.m());
+	}
+	return finalResultVector;
+}
+
+
+function constructPairWiseData(vec1,vec2){
+	var pw  = [[]];
+	for (var  i =0; i < vec1.length; i ++){
+		//use temporary random offset
+		pw.push([vec1[i] + i,vec2[i]+i]);
+	}
+	pw.shift();
+	return pw;
+}
+
+function linearRegression(ipoppw){
+	var linear_regression_line = ss.linear_regression()
+    .data(ipoppw).line();
 			
-			tmp.push(outputs[i]);
+    return linear_regression_line;
+} 
 
-		}
+
+function neuralTuringMachineMarkovModel(sequence){
+var bayes = require('bayes')
+
+var classifier = bayes()
+
+// teach it positive phrases
+
+	classifier.learn('amazing, awesome movie!! Yeah!! Oh boy.', 'positive')
+	classifier.learn('Sweet, this is incredibly, amazing, perfect, great!!', 'positive')
+
+// teach it a negative phrase
+
+	classifier.learn('terrible, shitty thing. Damn. Sucks!!', 'negative')
+
+	// now ask it to categorize a document it has never seen before
+
+	classifier.categorize('awesome, cool, amazing!! Yay.')
+// => 'positive'
+
+// serialize the classifier's state as a JSON string.
+	var stateJson = classifier.toJson()
+
+// load the classifier back from its JSON representation.
+	var revivedClassifier = bayes.fromJson(stateJson)
+}
+
+
+
+
+function buildBFForLoop(indexArr){
+	for(var i =0; i < indexArr.length; i++){
+		instructionSequence.push('+');
 	}
+	instructionSequence.push('[');
 }
-numericOutputs.push(tmp);
-var tmpAgainLOL = [];
-for(var iter =0 ; iter<numericOutputs.length; iter++){
-	tmpAgainLOL.push(parseFloat(numericOutputs[iter].join('')));
-}
-tmpAgainLOL.shift();
-
-
-
-var wr1 = writeWeights[1].split('\n');
-var wr2 =writeWeights[2].split('\n');;
-var wr3 =writeWeights[3].split('\n');;
-
-
-
-
-var wr1N = [];
-for(var iter =0; iter < wr1.length; iter++){
-	if(parseFloat(wr1[iter]) >0){
-		
-		wr1N.push(parseFloat(wr1[iter]));
-	}
-}
-
-var wr2N = [];
-
-for(var iter =0; iter < wr2.length; iter++){
-
-	if(parseFloat(wr2[iter]) >0){
-		wr2N.push(parseFloat(wr2[iter]));
-	}
-}
-
-var wr3N = [];
-for(var iter =0; iter < wr3.length; iter++){
-	if(parseFloat(wr3[iter])>0){
-		wr3N.push(parseFloat(wr3[iter]));
-	}
-}
-
-
-
- var tmpMax1 = 0;
- var tmpMax1Index = 0;
- for(var blah = 0; blah < wr1N.length; blah++){
- 	if(wr1N[blah]>tmpMax1){
- 		tmpMax1 = wr1N[blah];
- 		tmpMax1Index = blah;
- 	}
- }
-
-
- var tmpMax2 = 0;
- var tmpMax2Index = 0;
- for(var blah = 0; blah < wr2N.length; blah++){
- 	if(wr2N[blah]>tmpMax2){
- 		tmpMax2 = wr2N[blah];
- 		tmpMax2Index = blah;
- 	}
- }
-
-
- var tmpMax3 = 0;
- var tmpMax3Index = 0;
- for(var blah = 0; blah < wr3N.length; blah++){
- 	if(wr3N[blah]>tmpMax3){
- 		tmpMax3 = wr3N[blah];
- 		tmpMax3Index = blah;
- 	}
- }
-
-var indexArr = [];
-indexArr.push(tmpMax1Index);
-indexArr.push(tmpMax2Index);
-indexArr.push(tmpMax3Index);
-console.log(outBFInstructionSet(indexArr).join(''));
 
 function outBFInstructionSet(indexArr){
 	var instructionSet = [];
-	for(var i =0; i < indexArr[0]; i++){
-		instructionSet.push('>');
-	}
-	for(var i=0; i < tmpAgainLOL[0]; i++){
-		instructionSet.push('+')
-	}
+
+			if(resultOutPutObject[0]>.5){
+				instructionSet.push('+');
+			}
+	for(var k =1; k <resultOutPutObject.length;k++){		
+			
+			
+			for(var i =indexArr[k-1]; i < indexArr[k]; i++){
+				instructionSet.push('>');
+			}
+			if(resultOutPutObject[k]>.5){
+				instructionSet.push('+');
+			}
+
 	
-	for(var i =indexArr[0]; i < indexArr[1]; i++){
-		instructionSet.push('>');
 	}
-	for(var i=0; i < tmpAgainLOL[1]; i++){
-		instructionSet.push('+')
-	}
-	
-	for(var i =indexArr[1]; i < indexArr[2]; i++){
-		instructionSet.push('>');
-	}
-	for(var i=0; i < tmpAgainLOL[2]; i++){
-		instructionSet.push('+')
-	}
-	return instructionSet;
+	return instructionSet.join('');
 }
+
+
+

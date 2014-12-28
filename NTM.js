@@ -1,12 +1,13 @@
 
-
+var jf = require('jsonfile');
 var testSequenceLength = 3;
 var fs = require('fs');
 var util = require('util');
 var numeric = require('numeric');
 
-var synaptic = require('synaptic');
 
+var synaptic = require('synaptic');
+function runModel(maxSequenceLength,testSequenceArray,actaulInputSequence,targetSequence){
 var collectedTapeWeights = [[]];
 
 var memoryTapelength = 8;
@@ -20,37 +21,10 @@ for(var i = 0 ; i <memoryTapelength; i++){
 
 
 
-
-
- var log_filew = fs.createWriteStream(__dirname + '/writeWeights.log', {flags : 'w'});
-var log_filer = fs.createWriteStream(__dirname + '/readWeights.log', {flags : 'w'});
-var log_fileo = fs.createWriteStream(__dirname + '/outputs.log', {flags : 'w'});
-
- var log_stdout = process.stdout;
-
-
-  pprintWrite = function(d) { //
-     log_filew.write(util.format(d) + '\n');
-//  //  // log_stdout.write(util.format(d) + '\n');
-   };
-    pprintRead = function(d) { //
-     log_filer.write(util.format(d) + '\n');
-//  //  // log_stdout.write(util.format(d) + '\n');
-   };
-
-     pprintOutputs = function(d) { //
-     log_fileo.write(util.format(d) + '\n');
-//  //  // log_stdout.write(util.format(d) + '\n');
-   };
-
-
-
-
-
-
 // pprint("Intial memoryTape");
 // pprint(memoryTape);
 // pprint("\n");
+
 
 
  var readtapeWeights = initializeTapeWeights();
@@ -59,69 +33,68 @@ var log_fileo = fs.createWriteStream(__dirname + '/outputs.log', {flags : 'w'});
 var initialTapeWeights = initializeTapeWeights();
 var instructionSequence = [];
 
-var testSequenceArray= [1,0,1];
 
 
-        
+//Define the sequences 
+    var originalTargetSequenceLength = targetSequence.length;   
 
 
-var readVector =  (build_read(memoryTape,initialTapeWeights));
 
-var inputLayer = new synaptic.Layer(testSequenceArray.length+readVector.length);
-var hiddenLayer = new synaptic.Layer(40);
-var headLayer = new synaptic.Layer(29);
-var outputLayer = new synaptic.Layer(3);
+    var readVector =  (build_read(memoryTape,initialTapeWeights));
 
-inputLayer.project(hiddenLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
-hiddenLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
-hiddenLayer.project(headLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
-headLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
+    var inputLayer = new synaptic.Layer(maxSequenceLength+readVector.length);
+    var hiddenLayer = new synaptic.Layer(40);
+    var headLayer = new synaptic.Layer(29);
+    var outputLayer = new synaptic.Layer(targetSequence.length);
 
- // inputLayer.set({
- //     squash: synaptic.Neuron.squash.TANH,
- //     bias: 1
- // })
- // hiddenLayer.set({
- //     squash: synaptic.Neuron.squash.TANH,
- //     bias: 1
- // })
- // headLayer.set({
- //     squash: synaptic.Neuron.squash.TANH,
- //     bias: 1
- // })
+    inputLayer.project(hiddenLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
+    hiddenLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);  
+    hiddenLayer.project(headLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
+    headLayer.project(outputLayer,synaptic.Layer.connectionType.ALL_TO_ALL);
 
-var learningRate = .01;
-var actaulInputSequence = [1,0,1];
 
-/*------ TRAINING ----------*/
-for(var numOfRuns = 0; numOfRuns<200; numOfRuns++){
-    for(var j= 0; j < testSequenceArray.length; j++){
+
+    var learningRate = .01;
+
+    /*------ TRAINING ----------*/
+    for(var numOfRuns = 0; numOfRuns<200; numOfRuns++){
+        for(var j= 0; j < testSequenceArray.length; j++){
       
-        timeStep(testSequenceArray,false);        
+            timeStep(testSequenceArray,false);        
+        }
+
+        outputLayer.propagate(learningRate,targetSequence);
+        headLayer.propagate(learningRate);
+        hiddenLayer.propagate(learningRate);
+
+
     }
-
-    outputLayer.propagate(learningRate,testSequenceArray);
-    headLayer.propagate(learningRate);
-    hiddenLayer.propagate(learningRate);
-
-
-}
 
 
 /*------ RUNNING ----------*/
-for(var j= 0; j < testSequenceArray.length; j++){
-      
-        timeStep(testSequenceArray,true);        
-}
+    var resultWeightingObject =[];
+    var resultReadObject =[];
+    var resultOutPutObject =[];
 
 
+    for(var j= 0; j < originalTargetSequenceLength; j++){
 
+         timeStep(targetSequence,true);        
+    }
+
+    var returnObject = [];
+    returnObject.push(resultWeightingObject);
+    returnObject.push(resultReadObject);
+    returnObject.push(resultOutPutObject);
+   
+    console.log("NTM DONE");
+    return returnObject;
 
 
 function timeStep(input,run){
 
 
-            var testSequence = input;
+            var testSequence = padInput(input);
         
 
             
@@ -192,10 +165,12 @@ function timeStep(input,run){
 
                    var res = outputLayer.activate();
                    if(run){
-                    console.log(res);
-                   pprintWrite(writetapeWeight);
-                    pprintRead(readtapeWeights);
-                    pprintOutputs(outputLayer.activate());
+                   
+               
+                
+                    resultWeightingObject.push(writetapeWeight);
+                    resultReadObject.push(readtapeWeights);
+                    resultOutPutObject.push(res);
                   
                    }
                 
@@ -434,3 +409,14 @@ function parseInstructions(memoryTape,erase,add,tapeWeights){
     }
 
 }
+
+function padInput(input){
+    var iterLength = maxSequenceLength -input.length;
+    for(var i =0; i < iterLength; i++ ){
+            input.push(0);
+    }
+    return input;
+}
+}
+
+module.exports.runModel = runModel;
