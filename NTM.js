@@ -10,7 +10,7 @@ var synaptic = require('synaptic');
 function runModel(maxSequenceLength,testSequenceArray,actaulInputSequence,targetSequence){
 var collectedTapeWeights = [[]];
 
-var memoryTapelength = 8;
+var memoryTapelength = 16;
 var memoryTape = [];
 for(var i = 0 ; i <memoryTapelength; i++){
     memoryTape.push(Math.random());
@@ -320,45 +320,36 @@ function sharpen(tmpweight,gamma){
 function shift_convolve(tape_curr,shift){
         shift[3]  = 0;
         shift[4]  = 0;
-          shift[5]  = 0;
-            shift[6]  = 0;
-              shift[7]  = 0;
+        shift[5]  = 0;
+        shift[6]  = 0;
+        shift[7]  = 0;
+        shift[8]  = 0;
+        shift[9]  = 0;
+        shift[10]  = 0;
+        shift[11]  = 0;
+        shift[12]  = 0;
+        shift[13]  = 0;
+        shift[14]  = 0;
+        shift[15]  = 0;
+        var shiftMat= [];
+        for(var i =0; i < memoryTape.length; i++){
+            var row= [];
+            for(var j =0 ; j<memoryTape.length; j++){
+                if(i-j <0){
+                    row.push(shift[memoryTape.length - Math.abs(i-j)]);
+                }
+                else{
+                    row.push(shift[i-j]);
+                }
 
-       var shiftMat = [
-                    [shift[0],shift[7],shift[6],shift[5],shift[4],shift[3],shift[2],shift[1]],
-                    [shift[1],shift[0],shift[7],shift[6],shift[5],shift[4],shift[3],shift[2]],
-                    [shift[2],shift[1],shift[0],shift[7],shift[6],shift[5],shift[4],shift[3]],
-                    [shift[3],shift[2],shift[1],shift[0],shift[7],shift[6],shift[5],shift[4]],
-                    [shift[4],shift[3],shift[2],shift[1],shift[0],shift[7],shift[6],shift[5]],
-                    [shift[5],shift[4],shift[3],shift[2],shift[1],shift[0],shift[7],shift[6]],
-                    [shift[6],shift[5],shift[4],shift[3],shift[2],shift[1],shift[0],shift[7]],
-                    [shift[7],shift[6],shift[5], shift[4],shift[3],shift[2],shift[1],shift[0]]
-                    ];
-
-     
-
-
-   
-       
+            }
+            shiftMat.push(row);
+        }
+    
 
         return numeric.dotMV(shiftMat,tape_curr);
 
-    // var tmp = [];
-    // for(var i = 0; i < tape_curr.length; i++){
-    //     var res= 0;
-    //     for(var j =0; j < tape_curr.length; j++){
-    //         var moduloIndex= Math.abs((i-j)%tape_curr.length);
-    //         if(moduloIndex < shift.length){
-    //         res+=tape_curr[j]*shift[moduloIndex];
-    //         }
-    //         else{
-    //             res+=0;
-    //         }
-            
-    //     }
-    //     tmp.push(res);
-    // }
-
+  
 }
 function sigmoidSingle(t) {
     return 1/(1+Math.pow(Math.E, -t));
