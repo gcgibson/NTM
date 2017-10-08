@@ -361,7 +361,7 @@ function softmax(array){
         sum+= Math.exp(array[i]);
     }
     for(var i =0 ; i < array.length; i++){
-        tmpSoft.push( array[i]/sum);
+        tmpSoft.push( Math.exp(array[i])/sum);
     }
     return tmpSoft;
 }
